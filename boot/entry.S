@@ -49,19 +49,6 @@ read_from_disk:
     popa
     ret
 
-.print_error:
-    mov si, .error_msg
-    mov ah, 0xE
-.loop:
-    lodsb
-    test al, al
-    jz .print_end
-    int 0x10
-    jmp .loop
-.print_end:
-    jmp $
-.error_msg: db 'Drive read error', 0
-
 rust_entry_addr:
     dw rust_entry ; ip
     dw 0 ; cs
