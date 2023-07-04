@@ -6,6 +6,8 @@ GLOBAL entry
 GLOBAL drive_number
 EXTERN rust_entry
 EXTERN rust_code
+EXTERN GDTR
+EXTERN RUST_CODE_SEG_OFFSET
 
 entry:
     mov [drive_number], dl
@@ -23,7 +25,15 @@ entry:
 
     call read_from_disk
 
-    jmp 0000:rust_entry
+    cli
+    lgdt [GDTR]
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+
+    mov ax, [RUST_CODE_SEG_OFFSET]
+    mov [rust_entry_addr + 2], ax
+    jmp far [rust_entry_addr]
 
 read_from_disk:
     pusha
@@ -51,5 +61,9 @@ read_from_disk:
 .print_end:
     jmp $
 .error_msg: db 'Drive read error', 0
+
+rust_entry_addr:
+    dw rust_entry ; ip
+    dw 0 ; cs
 
 drive_number: db 0

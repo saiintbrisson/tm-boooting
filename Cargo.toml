@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bitflags = "2.3.3"
+x86 = "0.52.0"
 
 [profile.release]
 strip = "debuginfo"

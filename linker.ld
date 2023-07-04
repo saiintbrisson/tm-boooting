@@ -1,27 +1,30 @@
 MEMORY {
-    FLASH    (rx)  : ORIGIN = 0x0,    LENGTH = 144K
-    RAM      (rxw) : ORIGIN = 0x7C00,  LENGTH = 144K
-}
-
-PHDRS {
-   bootsector PT_LOAD;
-   text PT_LOAD;
+    BOOTSECTOR (rx)  : ORIGIN = 0x7C00, LENGTH = 512
+    BOOTLOADER (rxw) : ORIGIN = 0x7E00, LENGTH = 0x80000 - 0x7E00
 }
 
 ENTRY(entry)
 
 SECTIONS {
-    .text.boot 0x7C00 : {
+    .text.boot : {
         target/entry.o(.text.*)
-    } > FLASH AT > RAM : bootsector
+    } > BOOTSECTOR
 
     .text.section_signature (ADDR(.text.boot) + 510) : {
         SHORT(0xAA55);
-    } > FLASH AT > RAM : bootsector
+    } > BOOTSECTOR
 
     .text.rust : {
-        *(.text.*)
+        *(.text .text.*)
+        *(.data .data.*)
+        *(.rodata .rodata.*)
+        *(.bss .bss.*)
+        *(.got .got.plt)
         . = ALIGN(512);
-    } > FLASH AT > RAM : text = 0x00
+    } > BOOTLOADER = 0x00
     rust_code = LOADADDR(.text.rust);
+
+    /DISCARD/ : {
+        *(.eh_frame*)
+    }
 }
